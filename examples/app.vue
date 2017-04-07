@@ -103,6 +103,15 @@ export default {
           return this.mockCreateServerApi
         }
       }
+      this.createModel.on('request.fail', () => {
+        console.log('操作失败')
+      })
+      this.createModel.on('request.success', () => {
+        console.log('操作成功')
+      })
+      this.createModel.on('submit.done', () => {
+        console.log('提交done回调')
+      })
     },
     mockDeleteServerApi (params) {
       return new Promise((resolve, reject) => {

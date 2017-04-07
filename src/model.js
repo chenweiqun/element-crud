@@ -1,6 +1,5 @@
 import EventDispatch from './event/eventDispatch'
 import { MessageBox, Message } from 'element-ui'
-import ValidateError from './error/validateError'
 import _ from 'lodash'
 import Vue from 'vue'
 class BaseModel extends EventDispatch {
@@ -49,8 +48,8 @@ class BaseModel extends EventDispatch {
       await this.setFormData()
       this.emitEvent('fetch.success')
     } catch (e) {
-      console.warn(e)
       this.emitEvent('fetch.error', e)
+      BaseModel.print('fetch方法')
     } finally {
       this.emitEvent('fetch.done')
     }
@@ -67,40 +66,54 @@ class BaseModel extends EventDispatch {
   async submit (submitParams) {
     this.submitParams = submitParams
     try {
-      await this.beforeSubmit()
-      await this.validate()
-      await this.customValidate()
-      this.emitEvent('validate.success')
-      this.emitEvent('request.begen')
-      let res = await this.request()
-      if (process.env.NODE_ENV !== 'production') {
-        if (!res) {
-          console.warn('request在await之后未return')
+      try {
+        await this.beforeSubmit()
+      } catch (e) {
+        if (e !== 'cancel') {
+          BaseModel.print('beforeSubmit方法')
+          throw e
         }
       }
-      if (res && res.status && res.status !== 200) {
-        this.emitEvent('request.fail')
-        console.warn('请求失败')
-        throw new Error('request.fail')
-      } else {
-        this.ctx.$emit('request.success', this.submitParams, this.openParams)
-        this.emitEvent('request.success')
-      }
-    } catch (e) {
-      if (e.type === 'validateError') {
+      try {
+        await this.validate()
+      } catch (e) {
+        BaseModel.print('validate方法', 'warn')
         this.emitEvent('validate.fail')
-        if (e.alert) {
+        throw e
+      }
+      try {
+        await this.customValidate()
+      } catch (e) {
+        BaseModel.print('customValidate方法', 'warn')
+        if (e.message) {
           MessageBox.alert(e.message, '提示', {type: 'error'})
         }
+        throw e
       }
+      this.emitEvent('validate.success')
+      try {
+        this.emitEvent('request.begen')
+        await this.request()
+        this.ctx.$emit('request.success', this.submitParams, this.openParams)
+        this.emitEvent('request.success')
+      } catch (e) {
+        this.emitEvent('request.fail')
+        BaseModel.print('request请求失败')
+        throw e
+      } finally {
+        this.emitEvent('request.done')
+      }
+    } catch (e) {
       if (process.env.NODE_ENV !== 'production') {
-        if (e === 'cancel') {
-          return
-        }
         console.warn(e)
       }
     } finally {
       this.emitEvent('submit.done')
+    }
+  }
+  static print (method, type = 'warn') {
+    if (process.env.NODE_ENV !== 'production') {
+      console[type](`${method} 抛出错误`)
     }
   }
   beforeSubmit () {
