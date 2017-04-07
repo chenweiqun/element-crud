@@ -71,8 +71,8 @@ class BaseModel extends EventDispatch {
       } catch (e) {
         if (e !== 'cancel') {
           BaseModel.print('beforeSubmit方法')
-          throw e
         }
+        throw e
       }
       try {
         await this.validate()
@@ -130,7 +130,7 @@ class BaseModel extends EventDispatch {
         if (valid) {
           resolve(true)
         } else {
-          reject(new ValidateError('验证错误', false))
+          reject(new Error())
         }
       })
     })
