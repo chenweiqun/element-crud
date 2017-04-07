@@ -1,2 +1,15 @@
 # element-crud
-针对饿了么ui的增删改查封装
+extended element-ui for a crud library
+# Installation
+```shell
+npm install element-crud
+```
+# Example
+
+```shell
+npm run dev
+```
+
+# License
+
+[MIT](https://opensource.org/licenses/MIT)
