@@ -93,9 +93,9 @@ class BaseModel extends EventDispatch {
       this.emitEvent('validate.success')
       try {
         this.emitEvent('request.begen')
-        await this.request()
+        const res = await this.request()
         this.ctx.$emit('request.success', this.submitParams, this.openParams)
-        this.emitEvent('request.success')
+        this.emitEvent('request.success', res)
       } catch (e) {
         this.emitEvent('request.fail')
         BaseModel.print('request请求失败')

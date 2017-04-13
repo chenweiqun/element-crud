@@ -1,5 +1,6 @@
 # element-crud
 extended element-ui for a crud library
+
 # Installation
 ```shell
 npm install element-crud
