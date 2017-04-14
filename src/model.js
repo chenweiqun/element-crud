@@ -78,7 +78,7 @@ class BaseModel extends EventDispatch {
         await this.validate()
       } catch (e) {
         BaseModel.print('validate方法', 'warn')
-        this.emitEvent('validate.fail')
+        this.emitEvent('validate.fail', e)
         throw e
       }
       try {
@@ -94,10 +94,9 @@ class BaseModel extends EventDispatch {
       try {
         this.emitEvent('request.begen')
         const res = await this.request()
-        this.ctx.$emit('request.success', this.submitParams, this.openParams)
-        this.emitEvent('request.success', res)
+        this.emitEvent('request.success', res, this.openParams, this.submitParams)
       } catch (e) {
-        this.emitEvent('request.fail')
+        this.emitEvent('request.fail', e)
         BaseModel.print('request请求失败')
         throw e
       } finally {
